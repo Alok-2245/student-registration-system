@@ -11,10 +11,17 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <div class="page-shell">
+    <nav class="top-nav card" aria-label="Primary navigation">
+      <a href="#registration-section" class="top-nav__link">Registration Form</a>
+      <a href="#display-section" class="top-nav__link">Display Section</a>
+    </nav>
+
     <header class="hero">
       <div class="hero__copy">
-        <p class="eyebrow">JavaScript DOM Manipulation</p>
+        <p class="eyebrow">Student Portal</p>
         <h1>Student Registration System</h1>
         <p class="hero__lead">
           Register students, manage records, and update entries through an interactive
@@ -22,8 +29,9 @@
         </p>
       </div>
 
-      <section class="hero__summary card">
+      <section class="hero__summary card" aria-labelledby="overview-heading">
         <p class="section-kicker">Overview</p>
+        <h2 id="overview-heading" class="visually-hidden">Dashboard overview</h2>
         <div class="stat-grid">
           <article class="stat-card">
             <span class="stat-card__label">Students</span>
@@ -41,43 +49,43 @@
       </section>
     </header>
 
-    <main class="layout">
+    <main id="main-content" class="layout">
       <section class="panel-stack">
-        <section class="card section-card">
+        <section id="registration-section" class="card section-card" aria-labelledby="registration-heading">
           <div class="section-heading">
             <p class="section-kicker">Registration Form</p>
-            <h2>Add or update a student</h2>
+            <h2 id="registration-heading">Add or update a student</h2>
           </div>
 
           <form id="registration-form" class="registration-form" novalidate>
             <div class="form-grid">
               <label class="field">
                 <span class="field__label">Student Full Name</span>
-                <input id="student-name" name="studentName" type="text" class="text-input" placeholder="Enter full name">
-                <small class="field__error" data-error-for="studentName"></small>
+                <input id="student-name" name="studentName" type="text" class="text-input" placeholder="Enter full name using letters only" autocomplete="name" required aria-describedby="student-name-error">
+                <small id="student-name-error" class="field__error" data-error-for="studentName"></small>
               </label>
 
               <label class="field">
                 <span class="field__label">Student ID</span>
-                <input id="student-id" name="studentId" type="text" class="text-input" placeholder="Example: STU-2026-001">
-                <small class="field__error" data-error-for="studentId"></small>
+                <input id="student-id" name="studentId" type="text" inputmode="numeric" class="text-input" placeholder="Enter numeric student ID" required aria-describedby="student-id-error">
+                <small id="student-id-error" class="field__error" data-error-for="studentId"></small>
               </label>
 
               <label class="field">
                 <span class="field__label">Email Address</span>
-                <input id="email" name="email" type="email" class="text-input" placeholder="student@example.com">
-                <small class="field__error" data-error-for="email"></small>
+                <input id="email" name="email" type="email" class="text-input" placeholder="student@example.com" autocomplete="email" required aria-describedby="email-error">
+                <small id="email-error" class="field__error" data-error-for="email"></small>
               </label>
 
               <label class="field">
                 <span class="field__label">Contact Number</span>
-                <input id="contact-number" name="contactNumber" type="tel" inputmode="numeric" class="text-input" placeholder="At least 10 digits">
-                <small class="field__error" data-error-for="contactNumber"></small>
+                <input id="contact-number" name="contactNumber" type="tel" inputmode="numeric" class="text-input" placeholder="At least 10 digits" autocomplete="tel" required aria-describedby="contact-number-error">
+                <small id="contact-number-error" class="field__error" data-error-for="contactNumber"></small>
               </label>
 
               <label class="field">
                 <span class="field__label">Department</span>
-                <select id="department" name="department" class="select-input">
+                <select id="department" name="department" class="select-input" required aria-describedby="department-error">
                   <option value="">Select department</option>
                   <option value="Computer Science">Computer Science</option>
                   <option value="Information Technology">Information Technology</option>
@@ -85,19 +93,19 @@
                   <option value="Electrical Engineering">Electrical Engineering</option>
                   <option value="Mechanical Engineering">Mechanical Engineering</option>
                 </select>
-                <small class="field__error" data-error-for="department"></small>
+                <small id="department-error" class="field__error" data-error-for="department"></small>
               </label>
 
               <label class="field">
                 <span class="field__label">Year Level</span>
-                <select id="year-level" name="yearLevel" class="select-input">
+                <select id="year-level" name="yearLevel" class="select-input" required aria-describedby="year-level-error">
                   <option value="">Select year</option>
                   <option value="First Year">First Year</option>
                   <option value="Second Year">Second Year</option>
                   <option value="Third Year">Third Year</option>
                   <option value="Fourth Year">Fourth Year</option>
                 </select>
-                <small class="field__error" data-error-for="yearLevel"></small>
+                <small id="year-level-error" class="field__error" data-error-for="yearLevel"></small>
               </label>
             </div>
 
@@ -108,34 +116,38 @@
           </form>
         </section>
 
-        <section class="card section-card">
+        <aside class="card section-card" aria-labelledby="status-heading">
           <div class="section-heading">
             <p class="section-kicker">Form Status</p>
-            <h2>Submission feedback</h2>
+            <h2 id="status-heading">Submission feedback</h2>
           </div>
           <div id="status-banner" class="status-banner" aria-live="polite">
             Fill in the student details and submit the form to create a new record.
           </div>
-        </section>
+        </aside>
       </section>
 
       <section class="panel-stack">
-        <section class="card section-card">
+        <section id="display-section" class="card section-card" aria-labelledby="display-heading">
           <div class="section-heading section-heading--inline">
             <div>
               <p class="section-kicker">Display Section</p>
-              <h2>Registered students</h2>
+              <h2 id="display-heading">Registered students</h2>
+              <p class="section-copy">
+                View each student's name, student ID, email address, and contact number in a responsive list.
+              </p>
             </div>
-            <div class="toolbar">
-              <input id="search-input" type="search" class="text-input toolbar__search" placeholder="Search by name, ID, or department">
-              <select id="department-filter" class="select-input toolbar__filter">
+            <form class="toolbar" role="search" aria-label="Search student records">
+              <input id="search-input" type="search" class="text-input toolbar__search" placeholder="Search by name, ID, or department" aria-label="Search student records">
+              <select id="department-filter" class="select-input toolbar__filter" aria-label="Filter by department">
                 <option value="All">All departments</option>
               </select>
-            </div>
+            </form>
           </div>
 
-          <div class="table-shell">
+          <div id="table-shell" class="table-shell" aria-live="polite">
             <table class="students-table">
+              <caption class="visually-hidden">Registered student records</caption>
               <thead>
                 <tr>
                   <th>Name</th>

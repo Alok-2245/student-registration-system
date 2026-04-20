@@ -7,6 +7,7 @@ const submitButton = document.querySelector("#submit-button");
 const resetButton = document.querySelector("#reset-button");
 const searchInput = document.querySelector("#search-input");
 const departmentFilter = document.querySelector("#department-filter");
+const tableShell = document.querySelector("#table-shell");
 const tableBody = document.querySelector("#students-table-body");
 const studentCards = document.querySelector("#student-cards");
 const emptyState = document.querySelector("#empty-state");
@@ -30,6 +31,7 @@ const appState = {
   editingId: ""
 };
 
+// Keep submission feedback consistent across add, edit, validation, and delete flows.
 function showStatus(message, state = "idle") {
   statusBanner.textContent = message;
   statusBanner.classList.remove("is-success", "is-error");
@@ -67,6 +69,14 @@ function normalizeText(value) {
   return value.trim().replace(/\s+/g, " ");
 }
 
+function sanitizeStudentName(value) {
+  return value.replace(/[^A-Za-z\s]/g, "").replace(/\s{2,}/g, " ");
+}
+
+function sanitizeStudentId(value) {
+  return value.replace(/\D/g, "");
+}
+
 function sanitizeContactNumber(value) {
   return value.replace(/\D/g, "");
 }
@@ -74,8 +84,8 @@ function sanitizeContactNumber(value) {
 // Keep form values normalized before validation, comparison, and storage.
 function getFormData() {
   return {
-    studentName: normalizeText(formFields.studentName.value),
-    studentId: normalizeText(formFields.studentId.value).toUpperCase(),
+    studentName: normalizeText(sanitizeStudentName(formFields.studentName.value)),
+    studentId: sanitizeStudentId(formFields.studentId.value),
     email: normalizeText(formFields.email.value).toLowerCase(),
     contactNumber: sanitizeContactNumber(formFields.contactNumber.value),
     department: formFields.department.value,
@@ -86,20 +96,28 @@ function getFormData() {
 function validateForm(data) {
   const errors = {};
 
-  if (data.studentName.length < 3) {
-    errors.studentName = "Please enter a full name with at least 3 characters.";
+  if (!data.studentName) {
+    errors.studentName = "Student name is required.";
+  } else if (!/^[A-Za-z\s]+$/.test(data.studentName)) {
+    errors.studentName = "Student name should contain characters only.";
   }
 
-  if (!/^[A-Z0-9-]{6,20}$/.test(data.studentId)) {
-    errors.studentId = "Student ID should contain 6 to 20 uppercase letters, numbers, or hyphens.";
+  if (!data.studentId) {
+    errors.studentId = "Student ID is required.";
+  } else if (!/^\d+$/.test(data.studentId)) {
+    errors.studentId = "Student ID should contain numbers only.";
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+  if (!data.email) {
+    errors.email = "Email address is required.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.email = "Please enter a valid email address.";
   }
 
-  if (data.contactNumber.length < 10) {
-    errors.contactNumber = "Contact number must contain at least 10 digits.";
+  if (!data.contactNumber) {
+    errors.contactNumber = "Contact number is required.";
+  } else if (!/^\d{10,}$/.test(data.contactNumber)) {
+    errors.contactNumber = "Contact number must contain numbers only and at least 10 digits.";
   }
 
   if (!data.department) {
@@ -133,6 +151,7 @@ function renderErrors(errors) {
   });
 }
 
+// Persisting records in localStorage keeps the student list available after a refresh.
 function loadStudents() {
   try {
     const storedStudents = localStorage.getItem(storageKey);
@@ -194,6 +213,11 @@ function getVisibleStudents() {
   });
 }
 
+function refreshStudentDisplay() {
+  updateFilterOptions();
+  renderStudents();
+}
+
 function createActionButton(label, action, recordId, extraClass = "") {
   const button = document.createElement("button");
   button.type = "button";
@@ -230,11 +254,13 @@ function createStudentCard(student) {
   article.className = "student-card";
   article.innerHTML = `
     <h3>${student.studentName}</h3>
-    <p><strong>ID:</strong> ${student.studentId}</p>
-    <p><strong>Email:</strong> ${student.email}</p>
-    <p><strong>Contact:</strong> ${student.contactNumber}</p>
-    <p><strong>Department:</strong> ${student.department}</p>
-    <p><strong>Year Level:</strong> ${student.yearLevel}</p>
+    <div class="student-card__grid">
+      <p><span>Student ID</span><strong>${student.studentId}</strong></p>
+      <p><span>Email ID</span><strong>${student.email}</strong></p>
+      <p><span>Contact No.</span><strong>${student.contactNumber}</strong></p>
+      <p><span>Department</span><strong>${student.department}</strong></p>
+      <p><span>Year Level</span><strong>${student.yearLevel}</strong></p>
+    </div>
     <div class="card-actions"></div>
   `;
 
@@ -252,6 +278,8 @@ function renderStudents() {
   tableBody.innerHTML = "";
   studentCards.innerHTML = "";
 
+  // Render the same filtered dataset into both desktop and mobile layouts
+  // so the table and card views never drift out of sync.
   visibleStudents.forEach((student) => {
     tableBody.append(createTableRow(student));
     studentCards.append(createStudentCard(student));
@@ -266,7 +294,13 @@ function renderStudents() {
   }
 
   emptyState.classList.toggle("is-hidden", visibleStudents.length > 0);
+  updateTableScrollbar(visibleStudents.length);
   updateSummary();
+}
+
+function updateTableScrollbar(visibleStudentCount) {
+  const shouldScroll = visibleStudentCount > 5;
+  tableShell.classList.toggle("table-shell--scrollable", shouldScroll);
 }
 
 function resetForm() {
@@ -311,8 +345,7 @@ function handleDelete(recordId) {
 
   appState.students = appState.students.filter((item) => item.recordId !== recordId);
   saveStudents();
-  updateFilterOptions();
-  renderStudents();
+  refreshStudentDisplay();
 
   if (appState.editingId === recordId) {
     resetForm();
@@ -328,6 +361,8 @@ function upsertStudent(data) {
     recordId: appState.editingId || `record-${Date.now()}`
   };
 
+  // Reuse the same function for both create and update so validation,
+  // storage, and re-rendering follow one consistent path.
   if (appState.editingId) {
     appState.students = appState.students.map((student) =>
       student.recordId === appState.editingId ? studentRecord : student
@@ -337,15 +372,56 @@ function upsertStudent(data) {
   }
 
   saveStudents();
-  updateFilterOptions();
-  renderStudents();
+  refreshStudentDisplay();
 }
+
+function syncFieldValue(fieldName) {
+  if (fieldName === "studentName") {
+    formFields.studentName.value = sanitizeStudentName(formFields.studentName.value);
+  }
+
+  if (fieldName === "studentId") {
+    formFields.studentId.value = sanitizeStudentId(formFields.studentId.value);
+  }
+
+  if (fieldName === "contactNumber") {
+    formFields.contactNumber.value = sanitizeContactNumber(formFields.contactNumber.value);
+  }
+}
+
+function validateSingleField(fieldName) {
+  const formData = getFormData();
+  const errors = validateForm(formData);
+  getFieldErrorElement(fieldName).textContent = errors[fieldName] || "";
+}
+
+Object.entries(formFields).forEach(([fieldName, field]) => {
+  // Sanitize as the user types, then validate the active field in place
+  // so errors are shown early without waiting for full form submission.
+  field.addEventListener("input", () => {
+    syncFieldValue(fieldName);
+    validateSingleField(fieldName);
+  });
+
+  field.addEventListener("blur", () => {
+    syncFieldValue(fieldName);
+    validateSingleField(fieldName);
+  });
+});
 
 registrationForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const formData = getFormData();
+  const isEmptySubmission = Object.values(formData).every((value) => value === "");
   const errors = validateForm(formData);
+
+  if (isEmptySubmission) {
+    renderErrors(errors);
+    showStatus("Empty rows are not allowed. Fill in the student details first.", "error");
+    showToast("Empty row not allowed");
+    return;
+  }
 
   if (Object.keys(errors).length > 0) {
     renderErrors(errors);
@@ -401,5 +477,4 @@ document.addEventListener("click", (event) => {
 
 // Restore previously saved records before the first render.
 loadStudents();
-updateFilterOptions();
-renderStudents();
+refreshStudentDisplay();
