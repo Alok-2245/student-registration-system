@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Registration System</title>
+  <meta
+    name="description"
+    content="A responsive student registration system built with HTML, CSS, and JavaScript DOM manipulation."
+  >
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero__copy">
+        <p class="eyebrow">JavaScript DOM Manipulation</p>
+        <h1>Student Registration System</h1>
+        <p class="hero__lead">
+          Register students, manage records, and update entries through an interactive
+          responsive dashboard built with plain HTML, CSS, and JavaScript.
+        </p>
+      </div>
+
+      <section class="hero__summary card">
+        <p class="section-kicker">Overview</p>
+        <div class="stat-grid">
+          <article class="stat-card">
+            <span class="stat-card__label">Students</span>
+            <strong id="total-students">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Departments</span>
+            <strong id="total-departments">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Submitted</span>
+            <strong id="submission-state">Ready</strong>
+          </article>
+        </div>
+      </section>
+    </header>
+
+    <main class="layout">
+      <section class="panel-stack">
+        <section class="card section-card">
+          <div class="section-heading">
+            <p class="section-kicker">Registration Form</p>
+            <h2>Add or update a student</h2>
+          </div>
+
+          <form id="registration-form" class="registration-form" novalidate>
+            <div class="form-grid">
+              <label class="field">
+                <span class="field__label">Student Full Name</span>
+                <input id="student-name" name="studentName" type="text" class="text-input" placeholder="Enter full name">
+                <small class="field__error" data-error-for="studentName"></small>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Student ID</span>
+                <input id="student-id" name="studentId" type="text" class="text-input" placeholder="Example: STU-2026-001">
+                <small class="field__error" data-error-for="studentId"></small>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Email Address</span>
+                <input id="email" name="email" type="email" class="text-input" placeholder="student@example.com">
+                <small class="field__error" data-error-for="email"></small>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Contact Number</span>
+                <input id="contact-number" name="contactNumber" type="tel" inputmode="numeric" class="text-input" placeholder="At least 10 digits">
+                <small class="field__error" data-error-for="contactNumber"></small>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Department</span>
+                <select id="department" name="department" class="select-input">
+                  <option value="">Select department</option>
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="Business Administration">Business Administration</option>
+                  <option value="Electrical Engineering">Electrical Engineering</option>
+                  <option value="Mechanical Engineering">Mechanical Engineering</option>
+                </select>
+                <small class="field__error" data-error-for="department"></small>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Year Level</span>
+                <select id="year-level" name="yearLevel" class="select-input">
+                  <option value="">Select year</option>
+                  <option value="First Year">First Year</option>
+                  <option value="Second Year">Second Year</option>
+                  <option value="Third Year">Third Year</option>
+                  <option value="Fourth Year">Fourth Year</option>
+                </select>
+                <small class="field__error" data-error-for="yearLevel"></small>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button id="submit-button" type="submit" class="primary-button">Register Student</button>
+              <button id="reset-button" type="button" class="secondary-button">Clear Form</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card section-card">
+          <div class="section-heading">
+            <p class="section-kicker">Form Status</p>
+            <h2>Submission feedback</h2>
+          </div>
+          <div id="status-banner" class="status-banner" aria-live="polite">
+            Fill in the student details and submit the form to create a new record.
+          </div>
+        </section>
+      </section>
+
+      <section class="panel-stack">
+        <section class="card section-card">
+          <div class="section-heading section-heading--inline">
+            <div>
+              <p class="section-kicker">Display Section</p>
+              <h2>Registered students</h2>
+            </div>
+            <div class="toolbar">
+              <input id="search-input" type="search" class="text-input toolbar__search" placeholder="Search by name, ID, or department">
+              <select id="department-filter" class="select-input toolbar__filter">
+                <option value="All">All departments</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-shell">
+            <table class="students-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Student ID</th>
+                  <th>Email</th>
+                  <th>Contact</th>
+                  <th>Department</th>
+                  <th>Year</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="students-table-body"></tbody>
+            </table>
+          </div>
+
+          <div id="student-cards" class="student-cards"></div>
+
+          <div id="empty-state" class="empty-state">
+            <h3 id="empty-state-title">No student records yet</h3>
+            <p id="empty-state-copy">Registered students will appear here after you submit the form.</p>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
